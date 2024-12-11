@@ -1,53 +1,62 @@
+import sys
+
 def main():
-    # Prompt the user for the filename
-    filename = input("Enter the path to the source code file: ")
+    # Check if the filename is provided in the command line arguments
+    if len(sys.argv) < 2:
+        print("Usage: python script_name.py <path_to_source_code_file>")
+        sys.exit(1)
+
+    filename = sys.argv[1]
     comments = []
     in_block_comment = False
-
 
     try:
         # Attempt to open and read the file
         with open(filename, 'r') as f:
             content = f.read()
         
-        # For now, just output what we read to ensure the interface works
-    
+        # Output the original file content
         split_content = content.splitlines()
         print("\n--- File Contents ---")
         print(content)
         print("---------------------")
 
+        # Process and print content without comments
         print("\n--- File Content with no comments ---")
-        # Check sourcecode for comments
         for line in split_content:
-            if (in_block_comment) and ("*/" not in line):
+            if in_block_comment and "*/" not in line:
+                # Currently inside a block comment and no closing tag found
                 continue
+
+            # Handle single-line comments
             if "//" in line:
                 split_line = line.split("//")
                 line = split_line[0]
-            if ("/*" in line) and (in_block_comment == False):
-                in_block_comment = True 
+
+            # Handle block comments starting
+            if "/*" in line and not in_block_comment:
+                in_block_comment = True
                 split_line = line.split("/*")
                 before_comment = split_line[0]
                 after_comment = split_line[1]
                 line_to_print = before_comment
-                if ("*/" in after_comment):
+                if "*/" in after_comment:
                     in_block_comment = False
                     split_after_comment = after_comment.split("*/")
                     line_to_print += split_after_comment[1]
                 line = line_to_print
-                if (not line):
+                if not line:
                     continue
-            if ("*/" in line):
+
+            # Handle block comments ending
+            if "*/" in line and in_block_comment:
                 in_block_comment = False
                 split_line = line.split("*/")
                 line = split_line[1]
-                if (not line):
+                if not line:
                     continue
-            print(line)
-            
-            
 
+            print(line)
 
     except FileNotFoundError:
         print("Error: The file was not found. Please double-check the path.")
