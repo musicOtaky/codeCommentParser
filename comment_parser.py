@@ -1,25 +1,12 @@
 import sys
 
-def main():
-    # Check if the filename is provided in the command line arguments
-    if len(sys.argv) < 2:
-        print("Usage: python script_name.py <path_to_source_code_file>")
-        sys.exit(1)
-
-    filename = sys.argv[1]
-    comments = []
+def remove_comments(filename):
     in_block_comment = False
-
     try:
         # Attempt to open and read the file
         with open(filename, 'r') as f:
             content = f.read()
-        
-        # Output the original file content
         split_content = content.splitlines()
-        print("\n--- File Contents ---")
-        print(content)
-        print("---------------------")
 
         # Process and print content without comments
         print("\n--- File Content with no comments ---")
@@ -64,6 +51,16 @@ def main():
         print("Error: You do not have permission to read this file.")
     except Exception as e:
         print(f"An unexpected error occurred: {e}")
+
+def main():
+    # Check if the filename is provided in the command line arguments
+    if len(sys.argv) < 2:
+        print("Usage: python script_name.py <path_to_source_code_file>")
+        sys.exit(1)
+
+    filename = sys.argv[1]
+    remove_comments(filename)
+    
 
 if __name__ == "__main__":
     main()

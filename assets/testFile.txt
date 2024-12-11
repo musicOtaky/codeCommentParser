@@ -1,17 +1,7 @@
-this is 
-a 
-test
-    lol //bla
-        def function: /* test test
-    test test
-test */
-
-this is /* a test */ also a test
-
-/* test here
-and here
-also here */
-
-funct: testing
-
-def /*hier kommt eine funktion*/ funktion() // macht irgendwas
+int main() {
+    // This is a single line comment
+    printf("Hello"); /* block comment */ printf("World");
+    /* multiline
+       comment */
+    return 0; // Another comment
+}
