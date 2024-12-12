@@ -1,7 +1,0 @@
-int main() {
-    // This is a single line comment
-    printf("Hello"); /* block comment */ printf("World");
-    /* multiline
-       comment */
-    return 0; // Another comment
-}
