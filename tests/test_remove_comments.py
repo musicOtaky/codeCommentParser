@@ -5,167 +5,157 @@ import os
 from unittest.mock import patch
 from pathlib import Path
 
-from comment_parser import main
+from comment_parser import remove_comments
 
-class TestSingleLine(unittest.TestCase):
+class TestSingleLineCommentRemoval(unittest.TestCase):
+    def test_single_line_comments(self):
+        input_content = """#include <stdio.h>
 
-    def setUp(self):
-        # Define paths to input and expected output files
-        self.input_file = Path(__file__).parent / "assets/test_single_line.c"
-        self.expected_file = Path(__file__).parent / "assets/expected_single_line.c"
+// This is a single-line comment
+int main() {
+    printf("Hello World!\\n"); // print a greeting
+    return 0; // end main
+}
+"""
 
-        if not self.input_file.is_file():
-            self.fail(f"Input file not found: {self.input_file}")
-        if not self.expected_file.is_file():
-            self.fail(f"Expected output file not found: {self.expected_file}")
+        expected_output = """#include <stdio.h>
 
-    def test_remove_comments(self):
-        # Read expected output
-        with open(self.expected_file, 'r') as ef:
-            expected_output = ef.read()
 
-        # Capture the output of the main function
-        captured_output = io.StringIO()
-        with patch.object(sys, 'argv', ['comment_parser', str(self.input_file)]):
-            with patch('sys.stdout', new=captured_output):
-                main()
+int main() {
+    printf("Hello World!\\n"); 
+    return 0; 
+}
+"""
 
-        actual_output = captured_output.getvalue()
+        # Call the remove_comments function directly
+        actual_output = remove_comments(input_content)
 
-        # Directly compare the actual and expected outputs
-        self.assertEqual(
-            actual_output,
-            expected_output,
-            "The processed output does not match the expected output."
-        )
+        # Assert that the actual output matches the expected output
+        self.assertEqual(actual_output, expected_output, "The processed output does not match the expected output.")
 
-class TestBlock(unittest.TestCase):
+class TestBlockCommentRemoval(unittest.TestCase):
+    def test_single_line_comments(self):
+        input_content = """#include <stdio.h>
 
-    def setUp(self):
-        # Define paths to input and expected output files
-        self.input_file = Path(__file__).parent / "assets/test_block.c"
-        self.expected_file = Path(__file__).parent / "assets/expected_block.c"
+/* This comment spans
+   multiple lines and should
+   be removed completely */
 
-        if not self.input_file.is_file():
-            self.fail(f"Input file not found: {self.input_file}")
-        if not self.expected_file.is_file():
-            self.fail(f"Expected output file not found: {self.expected_file}")
+int main() {
+    /* inline block comment */ printf("Hello\n");
+    return 0;
+}
+"""
 
-    def test_remove_comments(self):
-        # Read expected output
-        with open(self.expected_file, 'r') as ef:
-            expected_output = ef.read()
+        expected_output = """#include <stdio.h>
 
-        # Capture the output of the main function
-        captured_output = io.StringIO()
-        with patch.object(sys, 'argv', ['comment_parser', str(self.input_file)]):
-            with patch('sys.stdout', new=captured_output):
-                main()
 
-        actual_output = captured_output.getvalue()
+int main() {
+     printf("Hello\n");
+    return 0;
+}
+"""
 
-        # Directly compare the actual and expected outputs
-        self.assertEqual(
-            actual_output,
-            expected_output,
-            "The processed output does not match the expected output."
-        )
+        # Call the remove_comments function directly
+        actual_output = remove_comments(input_content)
 
-class TestMixed(unittest.TestCase):
+        # Assert that the actual output matches the expected output
+        self.assertEqual(actual_output, expected_output, "The processed output does not match the expected output.")
 
-    def setUp(self):
-        # Define paths to input and expected output files
-        self.input_file = Path(__file__).parent / "assets/test_mixed.c"
-        self.expected_file = Path(__file__).parent / "assets/expected_mixed.c"
+class TestMixedCommentRemoval(unittest.TestCase):
+    def test_single_line_comments(self):
+        input_content = """#include <stdio.h>
+#include <stdlib.h> // std lib
 
-        if not self.input_file.is_file():
-            self.fail(f"Input file not found: {self.input_file}")
-        if not self.expected_file.is_file():
-            self.fail(f"Expected output file not found: {self.expected_file}")
+/*
+  Multi-line comment at top
+  describing the program
+*/
 
-    def test_remove_comments(self):
-        # Read expected output
-        with open(self.expected_file, 'r') as ef:
-            expected_output = ef.read()
+int main() {
+    // single line before code
+    printf("Starting...\n"); /* inline block comment */ printf("Done\n");
+    
+    /*
+    Another multiline
+    block
+    */
+    return 0; // trailing single-line
+}
+"""
 
-        # Capture the output of the main function
-        captured_output = io.StringIO()
-        with patch.object(sys, 'argv', ['comment_parser', str(self.input_file)]):
-            with patch('sys.stdout', new=captured_output):
-                main()
+        expected_output = """#include <stdio.h>
+#include <stdlib.h> 
 
-        actual_output = captured_output.getvalue()
 
-        # Directly compare the actual and expected outputs
-        self.assertEqual(
-            actual_output,
-            expected_output,
-            "The processed output does not match the expected output."
-        )
+int main() {
+    printf("Starting...\n");  printf("Done\n");
+    
+    return 0; 
+}
+"""
 
-class TestNoComments(unittest.TestCase):
+        # Call the remove_comments function directly
+        actual_output = remove_comments(input_content)
 
-    def setUp(self):
-        # Define paths to input and expected output files
-        self.input_file = Path(__file__).parent / "assets/test_no_comments.c"
-        self.expected_file = Path(__file__).parent / "assets/expected_no_comments.c"
+        # Assert that the actual output matches the expected output
+        self.assertEqual(actual_output, expected_output, "The processed output does not match the expected output.")
 
-        if not self.input_file.is_file():
-            self.fail(f"Input file not found: {self.input_file}")
-        if not self.expected_file.is_file():
-            self.fail(f"Expected output file not found: {self.expected_file}")
+class TestNoCommentRemoval(unittest.TestCase):
+    def test_single_line_comments(self):
+        input_content = """#include <stdio.h>
 
-    def test_remove_comments(self):
-        # Read expected output
-        with open(self.expected_file, 'r') as ef:
-            expected_output = ef.read()
+int main() {
+    printf("No comments here!\n");
+    return 0;
+}
+"""
 
-        # Capture the output of the main function
-        captured_output = io.StringIO()
-        with patch.object(sys, 'argv', ['comment_parser', str(self.input_file)]):
-            with patch('sys.stdout', new=captured_output):
-                main()
+        expected_output = """#include <stdio.h>
 
-        actual_output = captured_output.getvalue()
+int main() {
+    printf("No comments here!\n");
+    return 0;
+}
+"""
 
-        # Directly compare the actual and expected outputs
-        self.assertEqual(
-            actual_output,
-            expected_output,
-            "The processed output does not match the expected output."
-        )
+        # Call the remove_comments function directly
+        actual_output = remove_comments(input_content)
 
-class TestOnlyComments(unittest.TestCase):
+        # Assert that the actual output matches the expected output
+        self.assertEqual(actual_output, expected_output, "The processed output does not match the expected output.")
 
-    def setUp(self):
-        # Define paths to input and expected output files
-        self.input_file = Path(__file__).parent / "assets/test_only_comments.c"
-        self.expected_file = Path(__file__).parent / "assets/expected_only_comments.c"
 
-        if not self.input_file.is_file():
-            self.fail(f"Input file not found: {self.input_file}")
-        if not self.expected_file.is_file():
-            self.fail(f"Expected output file not found: {self.expected_file}")
+class TestAllCommentRemoval(unittest.TestCase):
+    def test_single_line_comments(self):
+        input_content = """// This file has no code, only comments
 
-    def test_remove_comments(self):
-        # Read expected output
-        with open(self.expected_file, 'r') as ef:
-            expected_output = ef.read()
+/* A multi-line
+   comment only
+*/
 
-        # Capture the output of the main function
-        captured_output = io.StringIO()
-        with patch.object(sys, 'argv', ['comment_parser', str(self.input_file)]):
-            with patch('sys.stdout', new=captured_output):
-                main()
+//
+// Another single-line comment after an empty line
 
-        actual_output = captured_output.getvalue()
+/* Ending block comment */
 
-        # Directly compare the actual and expected outputs
-        self.assertEqual(
-            actual_output,
-            expected_output,
-            "The processed output does not match the expected output."
-        )
+"""
+
+        expected_output = """
+
+
+
+
+
+
+"""
+
+        # Call the remove_comments function directly
+        actual_output = remove_comments(input_content)
+
+        # Assert that the actual output matches the expected output
+        self.assertEqual(actual_output, expected_output, "The processed output does not match the expected output.")
+
 
 if __name__ == '__main__':
     unittest.main()
